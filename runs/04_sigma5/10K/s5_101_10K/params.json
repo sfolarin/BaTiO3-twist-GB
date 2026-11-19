@@ -1,0 +1,30 @@
+{
+ "run_id": "s5_101_10K",
+ "group": "04_sigma5",
+ "structure": "s5_210",
+ "T": "10",
+ "dx": "1",
+ "dy": "0",
+ "dz": "1",
+ "baro": "aniso",
+ "nodes": "1",
+ "ntasks_per_node": "128",
+ "walltime": "01:15:00",
+ "qos": "regular",
+ "purpose": "<110> in GB plane",
+ "lammps_vars": {
+  "data": "input.data",
+  "T": "10",
+  "dx": "1",
+  "dy": "0",
+  "dz": "1",
+  "baro": "aniso",
+  "ff": "bto_coreshell.ff"
+ },
+ "created": "2026-10-31T15:05:43",
+ "git": "no-git",
+ "sha_template": "b8bc7c6839081f87",
+ "sha_forcefield": "000119d5c06a350a",
+ "sha_structure": "31d92ccf524212c0",
+ "test": false
+}

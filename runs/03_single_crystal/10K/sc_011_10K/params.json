@@ -1,0 +1,30 @@
+{
+ "run_id": "sc_011_10K",
+ "group": "03_single_crystal",
+ "structure": "sc_20",
+ "T": "10",
+ "dx": "0",
+ "dy": "1",
+ "dz": "1",
+ "baro": "aniso",
+ "nodes": "2",
+ "ntasks_per_node": "128",
+ "walltime": "03:00:00",
+ "qos": "premium",
+ "purpose": "R2 baseline <110>",
+ "lammps_vars": {
+  "data": "input.data",
+  "T": "10",
+  "dx": "0",
+  "dy": "1",
+  "dz": "1",
+  "baro": "aniso",
+  "ff": "bto_coreshell.ff"
+ },
+ "created": "2026-10-31T15:05:43",
+ "git": "no-git",
+ "sha_template": "b8bc7c6839081f87",
+ "sha_forcefield": "000119d5c06a350a",
+ "sha_structure": "d707e9a45eeaa5b9",
+ "test": false
+}

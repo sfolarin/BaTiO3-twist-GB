@@ -1,0 +1,46 @@
+# =============================================================================
+# BTO-GB-v2 : 0 K relaxation for ferroelectric DOMAIN-WALL energies (R phase).
+# Same damped-MD quench as gb_energy.in (see there for why not 'minimize'), but the cell is
+# triclinic and relaxed with a 'tri' barostat: R domains carry a shear spontaneous strain.
+# The two-domain cell and its single-domain reference (same box, same N) use this file;
+#   sigma_DW = (E_walls - E_mono) / (2 A)        (tools/dw_scan.py collect)
+#   -var data <file>  -var ff <forcefield>  [-var nq 3000] [-var nb 8000]
+# Output: "DWE_RESULT pe lx ly lz xy xz yz press fmax" + relaxed.data + relaxed.dump (xu yu zu)
+# =============================================================================
+variable        nq index 3000
+variable        nb index 8000
+units           metal
+dimension       3
+boundary        p p p
+atom_style      full
+timestep        0.0004
+fix             csinfo all property/atom i_CSID
+read_data       ${data} fix csinfo NULL CS-Info
+change_box      all triclinic
+include         ${ff}
+group           cores  type 1 2 3
+group           shells type 4 5 6
+compute         CSequ all temp/cs cores shells
+
+thermo          500
+thermo_style    custom step c_CSequ pe fmax press pxx pyy pzz lx ly lz
+thermo_modify   flush yes
+
+velocity        all create 1.0 4928459 dist gaussian temp CSequ
+fix             q  all nve/limit 0.02
+fix             vq all viscous 0.5
+run             ${nq}
+unfix           q
+unfix           vq
+fix             qb all npt temp 1.0 1.0 0.1 tri 0.0 0.0 1.0
+fix_modify      qb temp CSequ
+fix             vq all viscous 0.2
+run             ${nb}
+unfix           qb
+unfix           vq
+compute         pa all pe/atom
+run             0
+
+write_data      relaxed.data
+write_dump      all custom relaxed.dump id type xu yu zu c_pa modify sort id
+print           "DWE_RESULT $(pe:%.8f) $(lx:%.8f) $(ly:%.8f) $(lz:%.8f) $(xy:%.8f) $(xz:%.8f) $(yz:%.8f) $(press:%.2f) $(fmax:%.3e)"

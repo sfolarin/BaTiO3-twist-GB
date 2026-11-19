@@ -1,0 +1,21 @@
+# =============================================================================
+# BaTiO3 core-shell potential (Vielma & Schneider 2013) with LONG-RANGE electrostatics
+# (PPPM, tin-foil boundary conditions) instead of the Wolf sum. Identical bonds, Born
+# parameters and Born cutoff/shift as forcefield/bto_coreshell.ff; used only to test whether
+# results depend on the Wolf truncation (referee check A1). Real-space Coulomb cutoff 11 A.
+# =============================================================================
+bond_style      class2
+bond_coeff      1 0.0 149.2550   0.0 0.0
+bond_coeff      2 0.0 153.0700   0.0 20.8333
+bond_coeff      3 0.0 18.4650    0.0 208.3333
+
+pair_style      born/coul/long/cs 9.0 11.0
+pair_coeff      * *     0.0     1.0    0.0 0.0     0.0
+pair_coeff      4 6     7149.81 0.3019 0.0 0.0     0.0
+pair_coeff      5 6     7220.27 0.2303 0.0 0.0     0.0
+pair_coeff      6 6     3719.60 0.3408 0.0 597.17  0.0
+pair_modify     shift yes
+kspace_style    pppm 1.0e-5
+
+special_bonds   coul 0.0 0.0 0.0
+comm_modify     vel yes cutoff 15.0

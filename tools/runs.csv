@@ -1,0 +1,53 @@
+# One row per simulation. make_runs.py builds runs/<group>/<T>K/<run_name>/ from this table.
+# structure = file stem in structures/data/ ; d = field direction (lab frame) ; baro = aniso | tri
+# Wall times from the timing test (2026-10-31): 173 steps/s for the 16k-particle Sigma5 cell on 1 node;
+# ~400k steps per run -> Sigma5 ~40 min/node-run. Others scaled by particle count (estimates, ~2x margin).
+run_id,group,structure,T,dx,dy,dz,baro,nodes,ntasks_per_node,walltime,qos,purpose,extra_vars
+sc_001_10K,03_single_crystal,sc_20,10,0,0,1,aniso,2,128,03:00:00,premium,R2 baseline <100>
+sc_011_10K,03_single_crystal,sc_20,10,0,1,1,aniso,2,128,03:00:00,premium,R2 baseline <110>
+sc_111_10K,03_single_crystal,sc_20,10,1,1,1,aniso,2,128,03:00:00,premium,R1 rhombohedral polar axis
+sc_001_10K_tri,03_single_crystal,sc_20,10,0,0,1,tri,2,128,03:00:00,premium,R1 check: shear relaxed
+sc_001_300K,03_single_crystal,sc_20,300,0,0,1,aniso,2,128,06:00:00,premium,temperature baseline
+sc_011_300K,03_single_crystal,sc_20,300,0,1,1,aniso,2,128,06:00:00,premium,temperature baseline
+s5_100_10K,04_sigma5,s5_210,10,1,0,0,aniso,1,128,01:15:00,premium,field in GB plane
+s5_010_10K,04_sigma5,s5_210,10,0,1,0,aniso,1,128,01:15:00,premium,field along GB normal
+s5_001_10K,04_sigma5,s5_210,10,0,0,1,aniso,1,128,01:15:00,premium,field in GB plane (twist axis is y)
+s5_011_10K,04_sigma5,s5_210,10,0,1,1,aniso,1,128,01:15:00,premium,<110> with normal component
+s5_101_10K,04_sigma5,s5_210,10,1,0,1,aniso,1,128,01:15:00,premium,<110> in GB plane
+s5_110_10K,04_sigma5,s5_210,10,1,1,0,aniso,1,128,01:15:00,premium,<110> with normal component
+s5_111_10K,04_sigma5,s5_210,10,1,1,1,aniso,1,128,01:15:00,premium,<111> (Fig. 7 case)
+s5_001_300K,04_sigma5,s5_210,300,0,0,1,aniso,1,128,02:30:00,premium,R3a same GB at 300 K
+s5_010_300K,04_sigma5,s5_210,300,0,1,0,aniso,1,128,02:30:00,premium,R3a same GB at 300 K
+s5_011_300K,04_sigma5,s5_210,300,0,1,1,aniso,1,128,02:30:00,premium,R3a same GB at 300 K
+s61_001_10K,05_sigma61,s61_650,10,0,0,1,aniso,2,128,02:00:00,premium,second GB
+s61_010_10K,05_sigma61,s61_650,10,0,1,0,aniso,2,128,02:00:00,premium,second GB
+s61_011_10K,05_sigma61,s61_650,10,0,1,1,aniso,2,128,02:00:00,premium,second GB
+s61_001_300K,05_sigma61,s61_650,300,0,0,1,aniso,2,128,04:00:00,premium,second GB 300 K
+s61_010_300K,05_sigma61,s61_650,300,0,1,0,aniso,2,128,04:00:00,premium,second GB 300 K
+s61_011_300K,05_sigma61,s61_650,300,0,1,1,aniso,2,128,04:00:00,premium,second GB 300 K
+s5L_001_10K,06_finite_size,s5_210_L,10,0,0,1,aniso,4,128,02:30:00,premium,R3c finite size
+s5L_010_10K,06_finite_size,s5_210_L,10,0,1,0,aniso,4,128,02:30:00,premium,R3c finite size
+#DROPPED 2026-11-01 (shell collapse at TiO2|TiO2 junction during quench): s5m_010_10K,04_sigma5,s5m_210,10,0,1,0,aniso,1,128,01:15:00,premium,termination test: mirror stacking field along normal
+#DROPPED 2026-11-01 (shell collapse at TiO2|TiO2 junction during quench): s5m_001_10K,04_sigma5,s5m_210,10,0,0,1,aniso,1,128,01:15:00,premium,termination test: mirror stacking field in plane
+#DROPPED 2026-11-01 (shell collapse at TiO2|TiO2 junction during quench): s5m_011_10K,04_sigma5,s5m_210,10,0,1,1,aniso,1,128,01:15:00,premium,termination test: mirror stacking <110>
+#DROPPED 2026-11-01 (shell collapse at TiO2|TiO2 junction during quench): s5m_001_300K,04_sigma5,s5m_210,300,0,0,1,aniso,1,128,02:30:00,premium,termination test at 300 K: does in-plane remanence survive without the GB dipole
+#DROPPED 2026-11-01 (shell collapse at TiO2|TiO2 junction during quench): s5m_010_300K,04_sigma5,s5m_210,300,0,1,0,aniso,1,128,02:30:00,premium,termination test at 300 K: normal field without GB dipole (s5_010_300K crashed)
+# bias-compensation test (2026-11-01): static field +y cancels the GB built-in field; does in-plane remanence return at 300 K?
+s5b015_001_300K,04_sigma5,s5_210,300,0,0,1,aniso,1,128,02:30:00,premium,bias test: static Ey=+0.015 V/A + cycle along z,By=0.015
+s5b030_001_300K,04_sigma5,s5_210,300,0,0,1,aniso,1,128,02:30:00,premium,bias test: static Ey=+0.030 V/A + cycle along z,By=0.030
+s5b045_001_300K,04_sigma5,s5_210,300,0,0,1,aniso,1,128,02:30:00,premium,bias test: static Ey=+0.045 V/A + cycle along z,By=0.045
+sc_111_300K,03_single_crystal,sc_20,300,1,1,1,aniso,2,128,06:00:00,premium,temperature baseline <111> (Fig. 3),
+# ---- batch 1 (referee checks, 2026-11-01) ----
+s5p_010_10K,04_sigma5,s5_210,10,0,1,0,aniso,1,128,03:00:00,premium,A1 PPPM: normal-field pinning,ff=bto_coreshell_pppm.ff
+s5p_001_300K,04_sigma5,s5_210,300,0,0,1,aniso,1,128,06:00:00,premium,A1 PPPM: 300 K in-plane remanence loss,ff=bto_coreshell_pppm.ff
+sc_m102_10K,03_single_crystal,sc_20,10,-1,0,2,aniso,2,128,03:00:00,premium,A2 orientation-matched control for Sigma5 in-plane field,
+sc_m102_300K,03_single_crystal,sc_20,300,-1,0,2,aniso,2,128,06:00:00,premium,A2 orientation-matched control for Sigma5 in-plane field,
+sc_m506_10K,03_single_crystal,sc_20,10,-5,0,6,aniso,2,128,03:00:00,premium,A2 orientation-matched control for Sigma61 in-plane field,
+sc_m506_300K,03_single_crystal,sc_20,300,-5,0,6,aniso,2,128,06:00:00,premium,A2 orientation-matched control for Sigma61 in-plane field,
+s5r_010_10K,04_sigma5,s5r_210,10,0,1,0,aniso,1,128,01:30:00,premium,A3 reversed termination: normal field,
+s5r_001_10K,04_sigma5,s5r_210,10,0,0,1,aniso,1,128,01:30:00,premium,A3 reversed termination: in-plane field,
+s5L_001_300K,06_finite_size,s5_210_L,300,0,0,1,aniso,4,128,08:00:00,premium,A4 cell size at 300 K,
+s5_010_10K_poleP,04_sigma5,s5_210,10,0,1,0,aniso,1,128,01:30:00,premium,A5 reversed pre-poling,Epole=-0.07
+s5T_001_300K,06_finite_size,s5_210_T,300,0,0,1,aniso,2,128,08:00:00,premium,size: grain thickness x2 only,
+s5W_001_300K,06_finite_size,s5_210_W,300,0,0,1,aniso,4,128,08:00:00,premium,size: lateral x2 only,
+s5T4_001_300K,06_finite_size,s5_210_T4,300,0,0,1,aniso,4,128,12:00:00,premium,size: grain thickness x4 (16 nm),

@@ -1,0 +1,31 @@
+{
+ "kind": "twist",
+ "hk": [
+  2,
+  1
+ ],
+ "sigma": 5,
+ "theta_total_deg": 53.13010235415598,
+ "half_rotation_deg": 26.56505117707799,
+ "nrep": 4,
+ "ncell_per_grain": 10,
+ "shift": [
+  0.0,
+  0.0
+ ],
+ "a": 4.01,
+ "stacking": "reversed",
+ "seed": null,
+ "gb_planes_y": [
+  0.0,
+  40.099999999999994
+ ],
+ "gb_area_A2": 1286.4080000000001,
+ "n_ions": 8000,
+ "n_particles": 16000,
+ "box": [
+  35.86653035909663,
+  80.19999999999999,
+  35.86653035909663
+ ]
+}

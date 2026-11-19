@@ -1,0 +1,149 @@
+# =============================================================================
+# BTO-GB-v2 : cyclic electric-field hysteresis (single crystal or bicrystal)
+# ONE template for every run. All parameters come from -var (written by
+# tools/make_runs.py, recorded in params.json). Do not hand-edit copies.
+#
+# Required -var:  data  T  dx dy dz
+# Optional -var:  Emax(0.06 V/A)  Epole(0.07 V/A)  seg(10000 steps)  baro(aniso)  dt(0.0004 ps)
+#                 ff(path to forcefield)  seed  nthermo(500)  ndump(2000)
+#                 Bx By Bz (0.0 V/A): static bias field added to E*n from stage 2 on (bias-compensation
+#                 test: cancel the GB built-in field along the normal). Ex/Ey/Ez in traj.dat include it;
+#                 E and Ppar are the cycled field and P along n only.
+#
+# Protocol (identical for all runs):
+#   1. 0 K relaxation: damped-MD quench, fixed cell then damped NPT (see note in step 1)
+#   2. NPT equilibration at T, no field              (seg steps)
+#   3. pole with  -Epole * n                          (seg steps)
+#   4. NPT at zero field                              (seg steps)
+#   5. cycle E(t) = Emax*g(t) along unit vector n, g: 0 -> +1 -> -1 -> +1 -> 0
+#      with the same timing as the original paper runs (36 seg in total).
+# Field magnitude along n is Emax for EVERY direction (biaxial/triaxial
+# components are Emax/sqrt(2), Emax/sqrt(3)).
+# =============================================================================
+
+variable        Emax    index 0.06
+variable        Epole   index 0.07
+variable        seg     index 10000
+variable        baro    index aniso
+variable        ff      index ../../../forcefield/bto_coreshell.ff
+variable        seed    index 87287
+variable        nthermo index 500
+variable        ndump   index 2000
+variable        Bx      index 0.0
+variable        By      index 0.0
+variable        Bz      index 0.0
+variable        dt      index 0.0004   # ps; 300 K runs use 0.0002 (shell catastrophe at GB with 0.4 fs, run s5_010_300K)
+
+units           metal
+dimension       3
+boundary        p p p
+atom_style      full
+timestep        ${dt}
+
+fix             csinfo all property/atom i_CSID
+read_data       ${data} fix csinfo NULL CS-Info
+# 'aniso' keeps the cell orthogonal (normal strains only); 'tri' also relaxes shear
+# (needed to capture the small rhombohedral cell angle, ~89.7 deg for this potential)
+if "${baro} == tri" then "change_box all triclinic"
+include         ${ff}
+
+group           cores  type 1 2 3
+group           shells type 4 5 6
+compute         CSequ all temp/cs cores shells
+
+# --- field direction: unit vector n = d/|d| -----------------------------------
+variable        nrm  equal sqrt(${dx}^2+${dy}^2+${dz}^2)
+variable        nx   equal ${dx}/v_nrm
+variable        ny   equal ${dy}/v_nrm
+variable        nz   equal ${dz}/v_nrm
+print           "FIELD_DIRECTION n = (${nx}, ${ny}, ${nz})  Emax = ${Emax} V/A  T = ${T} K"
+
+# --- polarization monitor: sum q*u relative to the AS-BUILT ideal structure ---
+# (no periodic-cut offset; exact per-cell analysis is done from the dumps)
+compute         u    all displace/atom
+variable        qux  atom q*c_u[1]
+variable        quy  atom q*c_u[2]
+variable        quz  atom q*c_u[3]
+compute         sqx  all reduce sum v_qux
+compute         sqy  all reduce sum v_quy
+compute         sqz  all reduce sum v_quz
+variable        Px   equal c_sqx*16.0218/vol
+variable        Py   equal c_sqy*16.0218/vol
+variable        Pz   equal c_sqz*16.0218/vol
+variable        Ppar equal v_Px*v_nx+v_Py*v_ny+v_Pz*v_nz
+
+variable        E    equal 0.0
+variable        Ex   equal v_E*v_nx+${Bx}
+variable        Ey   equal v_E*v_ny+${By}
+variable        Ez   equal v_E*v_nz+${Bz}
+
+thermo          100
+thermo_style    custom step pe press pxx pyy pzz lx ly lz
+thermo_modify   flush yes
+
+# ---- 1. 0 K relaxation by damped-MD quench -----------------------------------------
+# NOT 'minimize': with born/coul/wolf/cs, shells that sit almost exactly on their cores
+# (r ~ 1e-8 A) give huge spurious forces (erfc-approximation noise / r) and CG/FIRE line
+# searches blow up (tested: f ~ 1e6 eV/A). A damped quench never takes such steps.
+# (a) positions at fixed cell, (b) cell + positions with damped NPT at ~0 K.
+velocity        all create 1.0 4928459 dist gaussian temp CSequ
+fix             q  all nve/limit 0.02
+fix             vq all viscous 0.5
+run             3000
+unfix           q
+unfix           vq
+fix             qb all npt temp 1.0 1.0 0.1 ${baro} 0.0 0.0 1.0
+fix_modify      qb temp CSequ
+fix             vq all viscous 0.2
+run             6000
+unfix           qb
+unfix           vq
+thermo_style    custom step pe fmax press pxx pyy pzz lx ly lz
+run             0
+print           "QUENCH_RESULT pe $(pe:%.4f) fmax $(fmax:%.2e) press $(press:%.1f)"
+write_data      minimized.data
+write_dump      all custom minimized.dump id type xu yu zu modify sort id
+
+# ---- shared MD settings ----------------------------------------------------------
+reset_timestep  0
+velocity        all create ${T} ${seed} dist gaussian bias yes temp CSequ mom yes rot no
+velocity        all scale ${T} temp CSequ
+thermo          1000
+thermo_style    custom step temp press pe lx ly lz v_E v_Px v_Py v_Pz v_Ppar
+thermo_modify   temp CSequ flush yes
+fix             md all npt temp ${T} ${T} 0.1 ${baro} 0.0 0.0 1.0
+fix_modify      md temp CSequ
+
+# one log line per nthermo steps for the WHOLE MD trajectory (stage, field, cell, P)
+variable        stage string eq
+fix             log all print ${nthermo} "${stage} $(step) $(time:%.4f) $(c_CSequ:%.3f) ${E} ${Ex} ${Ey} ${Ez} $(lx:%.6f) $(ly:%.6f) $(lz:%.6f) $(pxx:%.1f) $(pyy:%.1f) $(pzz:%.1f) ${Px} ${Py} ${Pz} ${Ppar}" &
+                file traj.dat screen no title "# stage step time_ps T E Ex Ey Ez lx ly lz pxx pyy pzz Px Py Pz Ppar  (E in V/A, P in C/m2, P relative to as-built ideal structure)"
+dump            d all custom ${ndump} dump.lammpstrj id type xu yu zu
+dump_modify     d sort id
+
+# ---- 2. equilibrate (no cycled field; bias B only, zero by default) ------------------
+fix             ef all efield v_Ex v_Ey v_Ez
+run             ${seg}
+
+# ---- 3. pole along -n --------------------------------------------------------------
+variable        stage string pole
+variable        E equal -${Epole}
+run             ${seg}
+
+# ---- 4. zero field -------------------------------------------------------------------
+variable        stage string zero
+variable        E equal 0.0
+run             ${seg}
+write_data      poled.data
+
+# ---- 5. field cycle --------------------------------------------------------------------
+variable        stage string cycle
+variable        t0   equal ${seg}*3
+variable        tc   equal (step-${t0})/${seg}
+variable        g    equal "((v_tc>=1)&&(v_tc<6))*(v_tc-1)/5 + ((v_tc>=6)&&(v_tc<18))*(1-(v_tc-6)/6) + ((v_tc>=18)&&(v_tc<30))*(-1+(v_tc-18)/6) + ((v_tc>=30)&&(v_tc<36))*(1-(v_tc-30)/6)"
+variable        E    equal ${Emax}*v_g
+variable        ncycle equal ${seg}*36
+run             ${ncycle}
+
+write_data      final.data
+print           "RUN_COMPLETE"

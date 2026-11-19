@@ -1,0 +1,31 @@
+{
+ "run_id": "sc_m102_10K",
+ "group": "03_single_crystal",
+ "structure": "sc_20",
+ "T": "10",
+ "dx": "-1",
+ "dy": "0",
+ "dz": "2",
+ "baro": "aniso",
+ "nodes": "2",
+ "ntasks_per_node": "128",
+ "walltime": "03:00:00",
+ "qos": "regular",
+ "purpose": "A2 orientation-matched control for Sigma5 in-plane field",
+ "extra_vars": "",
+ "lammps_vars": {
+  "data": "input.data",
+  "T": "10",
+  "dx": "-1",
+  "dy": "0",
+  "dz": "2",
+  "baro": "aniso",
+  "ff": "bto_coreshell.ff"
+ },
+ "created": "2026-11-01T22:20:07",
+ "git": "9822fdb",
+ "sha_template": "f07e11f504dc3a7d",
+ "sha_forcefield": "2a878a59f9495f3c",
+ "sha_structure": "d707e9a45eeaa5b9",
+ "test": false
+}

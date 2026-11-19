@@ -1,0 +1,2 @@
+# stage step time_ps T E Ex Ey Ez lx ly lz pxx pyy pzz Px Py Pz Ppar  (E in V/A, P in C/m2, P relative to as-built ideal structure)
+eq 0 0.0000 300.463 0 0 0 0 35.687982 82.220062 35.669836 3144.3 3245.3 3136.7 0.0283343732652173 -0.00229367269932583 0.0229448673328177 0.0229448673328177

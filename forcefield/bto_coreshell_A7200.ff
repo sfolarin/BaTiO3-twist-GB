@@ -1,0 +1,27 @@
+# =============================================================================
+# BaTiO3 anharmonic core-shell potential (Vielma & Schneider, J. Appl. Phys. 114,
+# 174108 (2013)) -- THE ONLY COPY. Every input includes this file.
+# Atom types: 1 Ba core, 2 Ti core, 3 O core, 4 Ba shell, 5 Ti shell, 6 O shell
+# Bond types: 1 Ba c-s, 2 Ti c-s, 3 O c-s
+# class2 bond: E = K2 dr^2 + K3 dr^3 + K4 dr^4  ->  K2 = k2/2, K4 = k4/24 (Table S1)
+# Wolf sum: alpha = 0.25 1/A, Born cutoff 9.0 A, Coulomb cutoff 11.0 A
+# Ti-O A = 7200.27 eV: published scaled-model value (Vielma & Schneider 2013, Table IV). Sensitivity test only.
+# =============================================================================
+bond_style      class2
+bond_coeff      1 0.0 149.2550   0.0 0.0
+bond_coeff      2 0.0 153.0700   0.0 20.8333
+bond_coeff      3 0.0 18.4650    0.0 208.3333
+
+pair_style      born/coul/wolf/cs 0.25 9.0 11.0
+pair_coeff      * *     0.0     1.0    0.0 0.0     0.0
+pair_coeff      4 6     7149.81 0.3019 0.0 0.0     0.0
+pair_coeff      5 6     7200.27 0.2303 0.0 0.0     0.0
+pair_coeff      6 6     3719.60 0.3408 0.0 597.17  0.0
+# Born energy shifted to zero at the 9 A cutoff. Forces are NOT changed (MD identical), but without the
+# shift the O-O -C/r^6 tail truncated at 9 A makes the ENERGY jump by ~20 meV/f.u. when the sqrt(5)*a
+# O-O shell crosses the cutoff (a ~ 4.017 A, right at the R lattice parameter; tested 2026-11-01).
+# Every energy difference (phases, GB, domain walls) must be evaluated with this line.
+pair_modify     shift yes
+
+special_bonds   coul 0.0 0.0 0.0
+comm_modify     vel yes cutoff 15.0

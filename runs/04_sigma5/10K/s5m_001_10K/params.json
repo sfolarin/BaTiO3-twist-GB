@@ -1,0 +1,30 @@
+{
+ "run_id": "s5m_001_10K",
+ "group": "04_sigma5",
+ "structure": "s5m_210",
+ "T": "10",
+ "dx": "0",
+ "dy": "0",
+ "dz": "1",
+ "baro": "aniso",
+ "nodes": "1",
+ "ntasks_per_node": "128",
+ "walltime": "01:15:00",
+ "qos": "premium",
+ "purpose": "termination test: mirror stacking field in plane",
+ "lammps_vars": {
+  "data": "input.data",
+  "T": "10",
+  "dx": "0",
+  "dy": "0",
+  "dz": "1",
+  "baro": "aniso",
+  "ff": "bto_coreshell.ff"
+ },
+ "created": "2026-10-31T23:20:02",
+ "git": "7d3f3a6",
+ "sha_template": "b8bc7c6839081f87",
+ "sha_forcefield": "000119d5c06a350a",
+ "sha_structure": "43a9df812261196f",
+ "test": false
+}

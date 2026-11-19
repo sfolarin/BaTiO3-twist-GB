@@ -1,0 +1,32 @@
+{
+ "run_id": "s5_010_10K_poleP",
+ "group": "04_sigma5",
+ "structure": "s5_210",
+ "T": "10",
+ "dx": "0",
+ "dy": "1",
+ "dz": "0",
+ "baro": "aniso",
+ "nodes": "1",
+ "ntasks_per_node": "128",
+ "walltime": "01:30:00",
+ "qos": "regular",
+ "purpose": "A5 reversed pre-poling",
+ "extra_vars": "Epole=-0.07",
+ "lammps_vars": {
+  "data": "input.data",
+  "T": "10",
+  "dx": "0",
+  "dy": "1",
+  "dz": "0",
+  "baro": "aniso",
+  "ff": "bto_coreshell.ff",
+  "Epole": "-0.07"
+ },
+ "created": "2026-11-01T22:20:08",
+ "git": "9822fdb",
+ "sha_template": "f07e11f504dc3a7d",
+ "sha_forcefield": "2a878a59f9495f3c",
+ "sha_structure": "731e65cbfec12bb5",
+ "test": false
+}

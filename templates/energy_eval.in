@@ -1,0 +1,22 @@
+# =============================================================================
+# BTO-GB-v2 : single-point energy of a relaxed structure with the CURRENT force field
+# (pair_modify shift yes). Used to re-evaluate GB / domain-wall energies of structures relaxed
+# before the shift was added: forces are unchanged by the shift, so the relaxed structures stand.
+#   -var data relaxed.data -var ff <forcefield>  [-var peatom 1 : also write eval_peatom.dump with per-atom pe]
+# Output: "EVAL_RESULT pe"
+# =============================================================================
+variable        peatom index 0
+units           metal
+dimension       3
+boundary        p p p
+atom_style      full
+fix             csinfo all property/atom i_CSID
+pair_style      born/coul/wolf/cs 0.25 9.0 11.0
+bond_style      class2
+read_data       ${data} fix csinfo NULL csinfo
+include         ${ff}
+thermo_style    custom step pe ebond ecoul evdwl press
+compute         pa all pe/atom
+run             0
+if "${peatom} == 1" then "write_dump all custom eval_peatom.dump id type xu yu zu c_pa modify sort id"
+print           "EVAL_RESULT $(pe:%.8f)"

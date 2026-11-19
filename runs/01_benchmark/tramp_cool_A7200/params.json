@@ -1,0 +1,17 @@
+{
+ "run_id": "tramp_cool_A7200",
+ "structure": "sc_12",
+ "forcefield": "bto_coreshell_A7200.ff",
+ "lammps_vars": {
+  "data": "input.data",
+  "ff": "bto_coreshell.ff",
+  "T0": 600,
+  "T1": 10,
+  "nramp": 1500000,
+  "nhold": 40000,
+  "dt": 0.0002,
+  "nthermo": 2000,
+  "ndump": 20000
+ },
+ "created": "2026-11-17T14:08:47"
+}

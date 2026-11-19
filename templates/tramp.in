@@ -1,0 +1,72 @@
+# =============================================================================
+# BTO-GB-v2 : zero-field temperature ramp of a single crystal (phase sequence, R1)
+#   -var data <file> -var ff <ff> -var T0 <K> -var T1 <K> -var nramp <steps>
+#   [-var dt 0.0004] [-var nthermo 2000] [-var ndump 20000] [-var nhold 20000]
+# Quench -> hold at T0 -> linear ramp T0 -> T1 (NPT, tri: cell angles free) -> hold at T1.
+# traj_T.dat: step T lx ly lz xy xz yz Px Py Pz (P relative to as-built ideal cubic)
+# Per-cell P components from dump_T.lammpstrj give the phase (R: |Px|=|Py|=|Pz|; O: two;
+# T: one; C: none) -- analysis/tramp_analysis.py.
+# =============================================================================
+variable        dt      index 0.0004
+variable        nthermo index 2000
+variable        ndump   index 20000
+variable        nhold   index 20000
+units           metal
+dimension       3
+boundary        p p p
+atom_style      full
+timestep        ${dt}
+fix             csinfo all property/atom i_CSID
+read_data       ${data} fix csinfo NULL CS-Info
+change_box      all triclinic
+include         ${ff}
+group           cores  type 1 2 3
+group           shells type 4 5 6
+compute         CSequ all temp/cs cores shells
+compute         u    all displace/atom
+variable        qux  atom q*c_u[1]
+variable        quy  atom q*c_u[2]
+variable        quz  atom q*c_u[3]
+compute         sqx  all reduce sum v_qux
+compute         sqy  all reduce sum v_quy
+compute         sqz  all reduce sum v_quz
+variable        Px   equal c_sqx*16.0218/vol
+variable        Py   equal c_sqy*16.0218/vol
+variable        Pz   equal c_sqz*16.0218/vol
+thermo          1000
+thermo_style    custom step temp press pe lx ly lz xy xz yz v_Px v_Py v_Pz
+thermo_modify   temp CSequ flush yes
+
+# quench (see hysteresis.in for why not 'minimize')
+velocity        all create 1.0 4928459 dist gaussian temp CSequ
+fix             q  all nve/limit 0.02
+fix             vq all viscous 0.5
+run             3000
+unfix           q
+unfix           vq
+fix             qb all npt temp 1.0 1.0 0.1 tri 0.0 0.0 1.0
+fix_modify      qb temp CSequ
+fix             vq all viscous 0.2
+run             6000
+unfix           qb
+unfix           vq
+
+reset_timestep  0
+velocity        all create ${T0} 87287 dist gaussian bias yes temp CSequ mom yes rot no
+fix             log all print ${nthermo} "$(step) $(c_CSequ:%.2f) $(lx:%.6f) $(ly:%.6f) $(lz:%.6f) $(xy:%.6f) $(xz:%.6f) $(yz:%.6f) ${Px} ${Py} ${Pz}" &
+                file traj_T.dat screen no title "# step T lx ly lz xy xz yz Px Py Pz"
+dump            d all custom ${ndump} dump_T.lammpstrj id type xu yu zu
+dump_modify     d sort id
+fix             md all npt temp ${T0} ${T0} 0.1 tri 0.0 0.0 1.0
+fix_modify      md temp CSequ
+run             ${nhold}
+unfix           md
+fix             md all npt temp ${T0} ${T1} 0.1 tri 0.0 0.0 1.0
+fix_modify      md temp CSequ
+run             ${nramp}
+unfix           md
+fix             md all npt temp ${T1} ${T1} 0.1 tri 0.0 0.0 1.0
+fix_modify      md temp CSequ
+run             ${nhold}
+write_data      final.data
+print           "RUN_COMPLETE"
